@@ -111,7 +111,6 @@ describe("html fetcher helpers", function(){
     archive.readListOfUrls(function(urls){
       resultArray = urls;
     });
-
     waitForThen(
       function() { return resultArray; },
       function(){
