@@ -1,5 +1,6 @@
 var path = require('path');
 var fs = require('fs');
+var fetcher = require('../workers/htmlfetcher.js');
 var archive = require('../helpers/archive-helpers');
 
 var headers = {
@@ -17,42 +18,61 @@ exports.serveAssets = function(res, asset, archived, callback) {
 
   switch (path.extname(asset)) {
     case '.html':
-      headers['Content-Type'] = 'text/html';
-      break;
+    headers['Content-Type'] = 'text/html';
+    break;
     case '.css':
-      headers['Content-Type'] = 'text/css';
-      break;
+    headers['Content-Type'] = 'text/css';
+    break;
   }
 
 
-  asset = archived ? archive.paths.archivedSites+asset : 
-          archive.paths.siteAssets+asset;
+  asset = archived ? archive.paths.archivedSites+"/"+asset+"/index.html" : 
+  archive.paths.siteAssets+asset;
 
-   console.log("Got to serveAssets");
-   fs.readFile(asset, 'utf8', function(err, data){
-      if (!(err)) {
-              // Send response back when file is done reading
+  console.log("Got to serveAssets");
+  fs.readFile(asset, 'utf8', function(err, data){
+    if (!(err)) {
+      // Send response back when file is done reading
       res.writeHead(200, headers);
       res.write(data);
       res.end();
     } else {
       sendResponse(res, 404);
     }
-
-    });
+  });
 };
 
 exports.writeAssets = function(req, res) {
   
   var statusCode=302;
   var data="";
-
+  console.log("In Write Assest");
   req.on('data', function(chunk) { data += chunk; });
   req.on('end', function() {
-    var url = data.split("=")[1] + '\n'; 
-    archive.addUrlToList(url);
-    sendResponse(res, statusCode);
+    console.log(data);
+
   });
+  var url = data.split("=")[1] + '\n';
+  var flag = archive.isUrlInList(url);
+
+  setTimeout(function(){
+    
+    
+
+    if (!(flag)){
+      console.log("Asset NOT Found: Making Local Copy")
+      archive.addUrlToList(url);
+      fetcher.getUrlContents(url);
+      sendResponse(res, statusCode);
+    } else {
+      console.log("Asset Found: Serving Local Copy")
+      exports.serveAssets(res, url, true, 200);
+    }
+
+  },2000); 
+
+  
+  
 
 
 };

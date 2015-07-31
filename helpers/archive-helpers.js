@@ -29,22 +29,63 @@ exports.readListOfUrls = function(callback){
   var results = "";
   fs.readFile(exports.paths.list, function(err, data){
     results += data;
-    callback(results.split("\n"));
+    results=results.split("\n");
+    console.log("readListOfUrls");
+    console.log("results array is: ");
+    console.log(results);
+
+    callback(results);
   });
 };
 
-exports.isUrlInList = function(){
-  // readListOfUrls(isUrlInList)
+exports.isUrlInList = function(url){
+  url = url.trim();
+  console.log("In isUrlInList");
+  return exports.readListOfUrls(function (array){
+    console.log("calling contains with url: "+url);
+    for (var i=0; i<array.length; i++){
+     
+      console.log(array[i]+" " +url+" Match? "+(array[i]===url))
+      console.log("array[i] length: "+array[i].length+" url length: "+ url.length)
+      if (array[i]===url){
+        return true;
+      }
+    } return false;
+  });
+
 };
 
 exports.addUrlToList = function(url){
   fs.appendFile(exports.paths.list, url);
 };
 
-exports.isURLArchived = function(){
+exports.isURLArchived = function(url){
+  var checkPath = exports.paths.archivedSites+"/"+url;
+  console.log("hey");
+  fs.exists(checkPath, function(exists){
+    console.log("Path: "+checkPath+" is: " +exists);
+    return false;
+  });
+  /*[{
+    url: google.com
+    status: archived
+  }, {
+    url: amazon.com
+    status: working
+  },
+  fs.readdir(exports.paths.archivedSites, function (err, files){
+      for (var i=0; i<files.length; i++){
+        if files[i] === url{
+          return true
+        }
+      return false
+      }
+  });
 
+  
+  ]*/
 };
 
-exports.downloadUrls = function(){
+exports.downloadUrls = function(list){
 
 };

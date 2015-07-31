@@ -23,11 +23,15 @@ var actions = {
   },
   
   'POST': function(req, res) {
-    helper.writeAssets(req, res);
+    console.log("Making a POST Request")
+    helper.writeAssets(req, res); // adds url to the list
   }
 }; 
 
 exports.handleRequest = function(req, res) {
+
   var action = actions[req.method];
-  action ? action(req, res) : utils.send404(res);
+  action(req, res);
+
 };
+
